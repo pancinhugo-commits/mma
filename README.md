@@ -1,2 +1,0 @@
-# mma
-mma algorithm

@@ -12,8 +12,8 @@ STRUCTURE DU PROJET
 
 Le projet est organisé comme suit :
 
-1. BIBLIOTHÈQUE ET EN-TÊTES
-   -----------------------
+1. BIBLIOTHÈQUE
+   ------------
    - libMma.h
      * Fichier d'en-tête principal contenant la classe MMASolver.
      * Implémente l'algorithme MMA pour résoudre des problèmes d'optimisation
@@ -35,11 +35,6 @@ Le projet est organisé comme suit :
      * Écrit la valeur de la fonction coût dans result.csv.
      * Écrit le gradient dans gradf.csv.
      * Par défaut, utilise f(x) = x1^2 + x2^2 + ... + xn^2.
-
-   - main.cpp
-     * Exemple d'utilisation de la classe MMASolver avec un problème d'optimisation
-       sous contraintes.
-     * Montre comment initialiser le solveur MMA et exécuter des itérations.
 
 3. SCRIPTS D'EXÉCUTION
    -------------------
@@ -86,9 +81,6 @@ Le projet est organisé comme suit :
    - optimisation
      * Binaire compilé de optimisation.cpp.
 
-   - optimisation_example
-     * Binaire compilé de main.cpp.
-
 --------------------------------------------------------------------------------
 COMMENT UTILISER LE PROJET
 --------------------------------------------------------------------------------
@@ -99,7 +91,6 @@ COMMENT UTILISER LE PROJET
 
    g++ -std=c++11 -o fcout fcout.cpp
    g++ -std=c++11 -o optimisation optimisation.cpp -I.
-   g++ -std=c++11 -o optimisation_example main.cpp -I.
 
 2. EXÉCUTION D'UNE ITÉRATION SIMPLE
    --------------------------------
@@ -128,13 +119,6 @@ COMMENT UTILISER LE PROJET
    - Appliquent MMA avec optimisation.
    - Vérifient la convergence (changement maximal < 1e-5 par défaut).
 
-4. EXÉCUTION DE L'EXEMPLE (main.cpp)
-   -----------------------------------
-   ./optimisation_example
-
-   Cet exemple montre comment utiliser MMASolver avec un problème d'optimisation
-   sous contraintes (2 contraintes non linéaires).
-
 --------------------------------------------------------------------------------
 PERSONNALISATION
 --------------------------------------------------------------------------------
@@ -146,8 +130,7 @@ PERSONNALISATION
 
 2. CHANGER LES PARAMÈTRES DE MMA
    ------------------------------
-   Dans optimisation.cpp ou main.cpp, vous pouvez ajuster les paramètres de
-   MMASolver :
+   Dans optimisation.cpp, vous pouvez ajuster les paramètres de MMASolver :
    - asyminit : Distance initiale des asymptotes.
    - asymdec : Facteur de décroissance des asymptotes.
    - asyminc : Facteur d'augmentation des asymptotes.

@@ -19,7 +19,7 @@
 #include <sstream>
 #include <vector>
 #include <string>
-#include "optimisation.h"
+#include "libMma.h"
 
 // ============================================================================
 // UTILITY FUNCTIONS FOR CSV I/O

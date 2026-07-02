@@ -1,8 +1,8 @@
 /**
  * @file main.cpp
- * @brief Exemple d'utilisation des algorithmes MMA et GCMMA pour résoudre un problème d'optimisation sous contraintes.
+ * @brief Exemple d'utilisation de l'algorithme MMA pour résoudre un problème d'optimisation sous contraintes.
  * 
- * Ce fichier illustre comment utiliser les classes MMASolver et GCMMASolver
+ * Ce fichier illustre comment utiliser la classe MMASolver
  * pour minimiser une fonction objectif sous des contraintes non linéaires.
  * 
  * Problème test :
@@ -56,7 +56,7 @@ void PrintVector(const double* x, int n, const std::string& name = "x") {
 /**
  * @brief Classe représentant un problème d'optimisation sous contraintes.
  * 
- * Ce problème est utilisé pour tester les algorithmes MMA et GCMMA.
+ * Ce problème est utilisé pour tester l'algorithme MMA.
  * Il définit :
  *   - Une fonction objectif quadratique.
  *   - Deux contraintes non linéaires (sphères en 3D).
@@ -143,7 +143,7 @@ public:
 
 int main() {
     std::cout << "===================================================" << std::endl;
-    std::cout << "| Test des algorithmes MMA et GCMMA              |" << std::endl;
+    std::cout << "| Test de l'algorithme MMA                       |" << std::endl;
     std::cout << "===================================================" << std::endl << std::endl;
 
     // Initialiser le problème
@@ -163,12 +163,9 @@ int main() {
     // Variables pour l'optimisation
     std::vector<double> x = problem.x0;  // Variables de conception courantes
     std::vector<double> x_old = x;       // Variables de l'itération précédente
-    std::vector<double> x_new(problem.n); // Nouvelles variables (pour GCMMA)
     
     double f;       // Valeur de la fonction objectif
-    double f_new;   // Nouvelle valeur de la fonction objectif (pour GCMMA)
     std::vector<double> g(problem.m);      // Valeurs des contraintes
-    std::vector<double> g_new(problem.m); // Nouvelles valeurs des contraintes (pour GCMMA)
     std::vector<double> df0dx(problem.n);  // Gradient de la fonction objectif
     std::vector<double> dfdx(problem.n * problem.m); // Gradient des contraintes
 
@@ -181,10 +178,10 @@ int main() {
     std::cout << std::endl;
 
     // ========================================================================
-    // TEST 1 : ALGORITHME MMA
+    // TEST : ALGORITHME MMA
     // ========================================================================
     std::cout << "===================================================" << std::endl;
-    std::cout << "| Test 1 : Algorithme MMA                          |" << std::endl;
+    std::cout << "| Test : Algorithme MMA                          |" << std::endl;
     std::cout << "===================================================" << std::endl << std::endl;
 
     // Initialiser le solveur MMA
@@ -231,77 +228,6 @@ int main() {
     PrintVector(x.data(), problem.n, "x");
     std::cout << "  - Contraintes : ";
     PrintVector(g.data(), problem.m, "g");
-    std::cout << std::endl;
-
-    // ========================================================================
-    // TEST 2 : ALGORITHME GCMMA
-    // ========================================================================
-    std::cout << "===================================================" << std::endl;
-    std::cout << "| Test 2 : Algorithme GCMMA                        |" << std::endl;
-    std::cout << "===================================================" << std::endl << std::endl;
-
-    // Réinitialiser les variables au point de départ
-    x = problem.x0;
-    x_old = x;
-    
-    // Initialiser le solveur GCMMA
-    GCMMASolver gcmma(problem.n, problem.m, 0.0, 1000.0, 1.0);
-    
-    // Configurer les paramètres de convergence globale
-    gcmma.SetGCParameters(0.1, 0.5, 1000); // eta=0.1, tau=0.5, max_iter=1000
-    
-    // Évaluer le point initial
-    problem.Evaluate(x.data(), &f, g.data());
-    double f_old = f; // Sauvegarder la valeur précédente de f
-    
-    // Boucle d'optimisation GCMMA
-    for (int iter = 0; iter < max_iter && ch > tol; ++iter) {
-        std::cout << "--- Itération " << iter + 1 << " ---" << std::endl;
-
-        // Évaluer les sensibilités
-        problem.EvaluateWithSensitivities(x.data(), &f, g.data(), df0dx.data(), dfdx.data());
-
-        // Mettre à jour les variables avec GCMMA
-        // Note : GCMMA::Update prend en compte la convergence globale
-        gcmma.Update(x.data(), df0dx.data(), g.data(), dfdx.data(), 
-                     problem.xmin.data(), problem.xmax.data(), f, f_old);
-
-        // Calculer le changement maximal
-        ch = 0.0;
-        for (int i = 0; i < problem.n; ++i) {
-            ch = std::max(ch, std::abs(x[i] - x_old[i]));
-            x_old[i] = x[i];
-        }
-
-        // Mettre à jour f_old pour la prochaine itération
-        f_old = f;
-
-        // Afficher les résultats
-        std::cout << "  - f(x) = " << f << std::endl;
-        std::cout << "  - Changement maximal : " << ch << std::endl;
-        std::cout << "  - Variables : ";
-        PrintVector(x.data(), problem.n, "x");
-        std::cout << "  - Contraintes : ";
-        PrintVector(g.data(), problem.m, "g");
-        std::cout << std::endl;
-    }
-
-    std::cout << "Résultat final (GCMMA) :" << std::endl;
-    std::cout << "  - f(x) = " << f << std::endl;
-    std::cout << "  - Variables : ";
-    PrintVector(x.data(), problem.n, "x");
-    std::cout << "  - Contraintes : ";
-    PrintVector(g.data(), problem.m, "g");
-    std::cout << std::endl;
-
-    // ========================================================================
-    // COMPARAISON DES RÉSULTATS
-    // ========================================================================
-    std::cout << "===================================================" << std::endl;
-    std::cout << "| Comparaison MMA vs GCMMA                       |" << std::endl;
-    std::cout << "===================================================" << std::endl;
-    std::cout << "Les deux algorithmes devraient converger vers une solution similaire," << std::endl;
-    std::cout << "mais GCMMA offre une convergence globale garantie." << std::endl;
     std::cout << std::endl;
 
     return 0;

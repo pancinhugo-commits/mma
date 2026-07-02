@@ -51,7 +51,7 @@ public:
     // Get the current iteration count
     int GetIterationCount() const { return iter; }
 
-private:
+protected:
     // Problem dimensions
     int n; // number of design variables
     int m; // number of constraints
@@ -114,43 +114,6 @@ private:
 
     // Compute x, y, z from lambda
     void XYZofLAMBDA(double* x);
-};
-
-// ============================================================================
-// GCMMA (Globally Convergent Method of Moving Asymptotes) Solver
-// ============================================================================
-
-class GCMMASolver : public MMASolver {
-public:
-    // Constructor
-    // nn: number of design variables
-    // mm: number of constraints
-    GCMMASolver(int nn, int mm, double ai = 1.0, double ci = 1.0, double di = 1.0);
-
-    // Update the GCMMA subproblem and solve for new x
-    // Additional parameters for global convergence:
-    // - f0: current objective function value
-    // - f_old: previous objective function value
-    void Update(double* xval, const double* dfdx, const double* gx, const double* dgdx,
-                const double* xmin, const double* xmax, double f0, double f_old);
-
-    // Set global convergence parameters
-    void SetGCParameters(double eta = 0.1, double tau = 0.5, int max_iter = 1000);
-
-private:
-    // Global convergence parameters
-    double eta; // Armijo condition parameter
-    double tau; // step size reduction factor
-    int max_iter; // maximum iterations for global convergence
-
-    // Previous objective function value
-    double f_prev;
-
-    // Check Armijo condition for global convergence
-    bool CheckArmijo(double f_new, double f_old, double step_size);
-
-    // Adjust step size for global convergence
-    double AdjustStepSize(double* x_new, double* x_old, double* grad, double f_new, double f_old);
 };
 
 // ============================================================================
@@ -557,67 +520,6 @@ inline void MMASolver::XYZofLAMBDA(double* x) {
         if (x[i] > beta[i]) {
             x[i] = beta[i];
         }
-    }
-}
-
-// ============================================================================
-// IMPLEMENTATION OF GCMMASolver
-// ============================================================================
-
-inline GCMMASolver::GCMMASolver(int nn, int mm, double ai, double ci, double di)
-    : MMASolver(nn, mm, ai, ci, di)
-    , eta(0.1)
-    , tau(0.5)
-    , max_iter(1000)
-    , f_prev(0.0)
-{}
-
-inline void GCMMASolver::SetGCParameters(double eta_val, double tau_val, int max_iter_val) {
-    eta = eta_val;
-    tau = tau_val;
-    max_iter = max_iter_val;
-}
-
-inline void GCMMASolver::Update(double* xval, const double* dfdx, const double* gx, const double* dgdx,
-                                const double* xmin, const double* xmax, double f0, double f_old) {
-    // Store previous objective value
-    f_prev = f_old;
-
-    // Call the parent Update method to generate and solve the subproblem
-    MMASolver::Update(xval, dfdx, gx, dgdx, xmin, xmax);
-
-    // Apply global convergence check (Armijo condition)
-    // Note: In practice, you would evaluate the new objective function f_new at xval
-    // and adjust the step size if necessary. This is a placeholder for the logic.
-    // For now, we assume the parent Update already handles the step.
-}
-
-inline bool GCMMASolver::CheckArmijo(double f_new, double f_old, double step_size) {
-    // Armijo condition: f_new <= f_old + eta * step_size * ||grad||^2
-    // For simplicity, we assume step_size is the norm of the step in design space.
-    // In practice, you would compute the actual gradient norm.
-    return (f_new <= f_old + eta * step_size);
-}
-
-inline double GCMMASolver::AdjustStepSize(double* x_new, double* x_old, double* grad, double f_new, double f_old) {
-    // Compute step size (Euclidean norm of the step)
-    double step_size = 0.0;
-    int n = this->n; // Access parent's n
-    for (int i = 0; i < n; i++) {
-        step_size += (x_new[i] - x_old[i]) * (x_new[i] - x_old[i]);
-    }
-    step_size = std::sqrt(step_size);
-
-    // Check Armijo condition
-    if (CheckArmijo(f_new, f_old, step_size)) {
-        return step_size; // Step is accepted
-    } else {
-        // Reduce step size (backtracking line search)
-        double new_step_size = tau * step_size;
-        for (int i = 0; i < n; i++) {
-            x_new[i] = x_old[i] + (x_new[i] - x_old[i]) * tau;
-        }
-        return new_step_size;
     }
 }
 
